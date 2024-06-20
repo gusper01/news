@@ -1,0 +1,41 @@
+name: Fetch and Publish News
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Se ejecuta diariamente a las 6 AM UTC
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4 google-cloud-translate pytest
+
+    - name: Run unit tests
+      run: |
+        pytest tests
+
+    - name: Fetch news and translate
+      run: python fetch_news.py
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add docs/index.html
+        git commit -m 'Update news'
+        git push
