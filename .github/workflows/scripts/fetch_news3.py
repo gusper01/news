@@ -2,7 +2,23 @@ import feedparser
 import pandas as pd
 import requests
 import xml.etree.ElementTree as ET
+import pandas as pd
 from datetime import datetime
+
+# Función para obtener noticias desde un feed RSS
+def fetch_news_from_rss(url, source_name):
+    feed = feedparser.parse(url)
+    news_items = []
+
+    for entry in feed.entries:
+        news_items.append({
+            "Title": entry.title,
+            "Link": entry.link,
+            "Published Date": entry.published,
+            "Summary": entry.summary
+        })
+
+    return pd.DataFrame(news_items), source_name
 
 # Función para obtener noticias del feed RSS de Reuters
 def get_news_from_rss(url):
@@ -66,27 +82,28 @@ news_df = get_news_from_rss(url)
 if news_df is not None:
     print("\nDataFrame:")
     print(news_df.head())  # Mostrar las primeras filas del DataFrame
-else:
-    print("No se pudieron obtener datos del RSS feed.")
 
-# Lista de feeds RSS (podemos agregar más feeds aquí)
+
+
+
+# Lista de feeds RSS
 rss_feeds = [
     ('https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best', 'Reuters'),
-    # Añade más feeds RSS aquí si es necesario
+    # Añade más feeds RSS aquí
 ]
 
 # Obtener noticias de todos los feeds RSS
 all_news = []
 for url, source_name in rss_feeds:
-    news_df, source = get_news_from_rss(url), source_name
-    if news_df is not None:
-        all_news.append((news_df, source))
-    else:
-        print(f"Failed to fetch data for {source_name}.")
+    news_df, source = fetch_news_from_rss(url, source_name)
+    all_news.append((news_df, source))
 
 # Generar la página HTML
 html_content = "<html><head><title>RSS News</title></head><body>"
 for news_df, source in all_news:
+#     html_content += f"<h2>{source}</h2>"
+#     html_content += news_df.to_html(index=False, escape=False)
+# html_content += "</body></html>"
     html_content += f"<h2>{source}</h2>"
     if not news_df.empty:
         df_html = news_df.to_html(index=False, escape=False)
@@ -95,11 +112,7 @@ for news_df, source in all_news:
     else:
         html_content += f"<p>No data available for {source}</p>"
 html_content += "</body></html>"
-
-# Verificar el contenido del HTML antes de guardarlo
-print("HTML Content Preview:")
-print(html_content[:2000])  # Imprime los primeros 2000 caracteres del HTML
-
+print(html_content[:2000])
 # Guardar la página HTML
 with open('docs/index.html', 'w', encoding='utf-8') as f:
     f.write(html_content)
