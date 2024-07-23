@@ -49,8 +49,14 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+    - name: Commit changes
+      run: |   
         git add docs/index.html
         git commit -m 'Update news'
-        git push
-    env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Push changes
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN.repo }}
+      run: | 
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN.repo }}@github.com/${{ github.repository }}
+        git push origin main
+    
