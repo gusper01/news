@@ -83,9 +83,11 @@ for url, source_name in rss_feeds:
         all_news.append((news_df, source))
     else:
         print(f"Failed to fetch data for {source_name}.")
-
+# Obtener la fecha actual
+current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 # Generar la página HTML
 html_content = "<html><head><title>RSS News</title></head><body>"
+html_content += f"<h1>RSS News Feed</h1><h3>Generated on: {current_date}</h3>"
 for news_df, source in all_news:
     html_content += f"<h2>{source}</h2>"
     if not news_df.empty:
