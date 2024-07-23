@@ -44,8 +44,7 @@ jobs:
         pytest Tests
 
     - name: Fetch news and translate
-      run: python  workflows/scripts/fetch_news.py
-
+      run: python .github/workflows/scripts/fetch_news.py
     - name: Commit and push changes
       run: |
         git config --global user.name 'github-actions[bot]'
