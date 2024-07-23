@@ -44,7 +44,7 @@ jobs:
         pytest Tests
 
     - name: Fetch news and translate
-      run: python fetch_news.py
+      run: python scripts/fetch_news.py
 
     - name: Commit and push changes
       run: |
