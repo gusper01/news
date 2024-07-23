@@ -36,7 +36,7 @@ jobs:
         pip show google-cloud-translate 
         pip show pytest
         pip show feedparser
-        pip show xml.etree.ElementTree  
+        
 
 
     - name: Run unit tests
