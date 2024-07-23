@@ -45,18 +45,9 @@ jobs:
 
     - name: Fetch news and translate
       run: python .github/workflows/scripts/fetch_news.py
-    - name: Commit and push changes
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions@github.com'
-    - name: Commit changes
-      run: |   
-        git add .
-        git commit -m 'Update news'
-    - name: Push changes
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git push origin main
-    
+   
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+       github_token: ${{ secrets.GITHUB_TOKEN }}
+       publish_dir: ./docs
