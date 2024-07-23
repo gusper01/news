@@ -55,8 +55,8 @@ jobs:
         git commit -m 'Update news'
     - name: Push changes
       env:
-          GITHUB_TOKEN: ${{ secrets.REPO1 }}
+          REPO1_TOKEN: ${{ secrets.REPO1 }}
       run: | 
-        git remote set-url origin https://x-access-token:${{ secrets.REPO1 }}@github.com/${{ github.repository }}
+        git remote set-url origin https://x-access-token:${{ secrets.REPO1_TOKEN }}@github.com/${{ github.repository }}
         git push origin main
     
