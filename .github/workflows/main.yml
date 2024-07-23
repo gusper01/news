@@ -41,7 +41,7 @@ jobs:
 
     - name: Run unit tests
       run: |
-        pytest tests
+        pytest Tests
 
     - name: Fetch news and translate
       run: python fetch_news.py
