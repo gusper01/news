@@ -4,13 +4,13 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
-# Función para obtener noticias del feed RSS de Reuters
+# Función para obtener noticias del feed RSS
 def get_news_from_rss(url):
     print(f"Fetching news from: {url}")
     try:
         # Configurar headers para la solicitud
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': 'application/xml'
         }
 
@@ -25,25 +25,25 @@ def get_news_from_rss(url):
 
             # Iterar sobre cada item (noticia) en el feed RSS
             for item in root.findall('.//item'):
-                title = item.find('title').text
-                link = item.find('link').text
-                published_date = item.find('pubDate').text
-                summary = item.find('description').text
-                summary = summary.replace('\n', ' ').replace('  ', ' ')
-                published_date = ' '.join(published_date.split()[:4])
-                # Imprimir detalles de la noticia
-                print(f"Title: {title}")
-                print(f"Link: {link}")
-                print(f"Published Date: {published_date}")
-                print(f"Summary: {summary}\n")
+                news = {}
+                news['Title'] = item.find('title').text if item.find('title') is not None else 'N/A'
+                news['Link'] = item.find('link').text if item.find('link') is not None else 'N/A'
+                news['Published Date'] = item.find('pubDate').text if item.find('pubDate') is not None else 'N/A'
+                news['Summary'] = item.find('description').text if item.find('description') is not None else 'N/A'
 
-                # Guardar los datos de la noticia en una lista
-                news_list.append({
-                    'Title': title,
-                 #   'Link': link,
-                    'Published Date': published_date,
-                    'Summary': summary
-                })
+                # Limpiar el texto del resumen
+                news['Summary'] = news['Summary'].replace('\n', ' ').replace('  ', ' ')
+
+                # Formatear la fecha publicada si está disponible
+                if news['Published Date'] != 'N/A':
+                    news['Published Date'] = ' '.join(news['Published Date'].split()[:4])
+
+                # Convertir el título en un enlace si el enlace está disponible
+                if news['Link'] != 'N/A':
+                    news['Title'] = f'<a href="{news["Link"]}" target="_blank">{news["Title"]}</a>'
+
+                # Agregar la noticia a la lista
+                news_list.append(news)
 
             # Crear un DataFrame de Pandas con los datos de las noticias
             df = pd.DataFrame(news_list)
@@ -57,37 +57,27 @@ def get_news_from_rss(url):
 
     return None
 
-# URL del feed RSS de Reuters
-url = 'https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best'
-
-# Obtener noticias del feed RSS y almacenarlas en un DataFrame
-news_df = get_news_from_rss(url)
-
-# Mostrar el DataFrame si se obtuvieron noticias correctamente
-if news_df is not None:
-    print("\nDataFrame:")
-    print(news_df.head())  # Mostrar las primeras filas del DataFrame
-else:
-    print("No se pudieron obtener datos del RSS feed.")
-
 # Lista de feeds RSS (podemos agregar más feeds aquí)
 rss_feeds = [
-    ('https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best', 'Reuters'), 
-    ('https://www.reutersagency.com/feed/?best-topics=tech&post_type=best', 'Reuters')
+    ('https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best', 'Reuters - Business Finance'),
+    ('https://www.reutersagency.com/feed/?best-topics=tech&post_type=best', 'Reuters - Tech'),
     # Añade más feeds RSS aquí si es necesario
 ]
 
 # Obtener noticias de todos los feeds RSS
 all_news = []
 for url, source_name in rss_feeds:
-    news_df, source = get_news_from_rss(url), source_name
+    news_df = get_news_from_rss(url)
     if news_df is not None:
-        all_news.append((news_df, source))
+        all_news.append((news_df, source_name))
+        print(f"\nDataFrame for {source_name}:")
+        print(news_df.head())  # Mostrar las primeras filas del DataFrame
     else:
         print(f"Failed to fetch data for {source_name}.")
+
 # Obtener la fecha actual
 current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-# Generar la página HTML
+
 # Generar la página HTML con Bootstrap
 html_content = """
 <!DOCTYPE html>
@@ -117,7 +107,7 @@ for news_df, source in all_news:
         <div class='card-body'>
     """
     if not news_df.empty:
-        df_html = news_df.to_html(index=False, escape=False, classes='table table-striped')
+        df_html = news_df.drop(columns=['Link']).to_html(index=False, escape=False, classes='table table-striped')
         html_content += f"<div class='table-responsive'>{df_html}</div>"
     else:
         html_content += f"<p>No data available for {source}</p>"
