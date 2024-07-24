@@ -72,7 +72,8 @@ else:
 
 # Lista de feeds RSS (podemos agregar más feeds aquí)
 rss_feeds = [
-    ('https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best', 'Reuters'),
+    ('https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best', 'Reuters'), 
+    ('https://www.reutersagency.com/feed/?best-topics=tech&post_type=best', 'Reuters')
     # Añade más feeds RSS aquí si es necesario
 ]
 
