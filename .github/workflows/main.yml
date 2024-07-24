@@ -3,6 +3,7 @@ name: Fetch and Publish News
 on:
   schedule:
     - cron: '0 6 * * *'  # Se ejecuta diariamente a las 6 AM UTC
+  #   - cron: '0 0 * * *'  # Ejecutar una vez al día a medianoche
   push:
     branches:
       - main
@@ -50,4 +51,5 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
        github_token: ${{ secrets.GITHUB_TOKEN }}
+       publish_branch: gh-pages
        publish_dir: ./docs
