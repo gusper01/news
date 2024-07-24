@@ -29,8 +29,7 @@ def get_news_from_rss(url):
                 link = item.find('link').text
                 published_date = item.find('pubDate').text
                 summary = item.find('description').text
-                summary = summary.replace('\n', ' ').replace('  ', ' ')
-                published_date = ' '.join(published_date.split()[:4])
+
                 # Imprimir detalles de la noticia
                 print(f"Title: {title}")
                 print(f"Link: {link}")
@@ -40,7 +39,7 @@ def get_news_from_rss(url):
                 # Guardar los datos de la noticia en una lista
                 news_list.append({
                     'Title': title,
-                 #   'Link': link,
+                    'Link': link,
                     'Published Date': published_date,
                     'Summary': summary
                 })
@@ -87,46 +86,17 @@ for url, source_name in rss_feeds:
 # Obtener la fecha actual
 current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 # Generar la página HTML
-# Generar la página HTML con Bootstrap
-html_content = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RSS News</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</head>
-<body>
-<div class="container">
-    <h1 class="mt-4 mb-4">RSS News Feed</h1>
-    <h3>Generated on: {current_date}</h3>
-""".format(current_date=current_date)
-
-# Agregar noticias con estilo Bootstrap
+html_content = "<html><head><title>RSS News</title></head><body>"
+html_content += f"<h1>RSS News Feed</h1><h3>Generated on: {current_date}</h3>"
 for news_df, source in all_news:
-    html_content += f"""
-    <div class='card mb-4'>
-        <div class='card-header'>
-            <h2>{source}</h2>
-        </div>
-        <div class='card-body'>
-    """
+    html_content += f"<h2>{source}</h2>"
     if not news_df.empty:
-        df_html = news_df.to_html(index=False, escape=False, classes='table table-striped')
-        html_content += f"<div class='table-responsive'>{df_html}</div>"
+        df_html = news_df.to_html(index=False, escape=False)
+        html_content += f"<h3>Data for {source}</h3>"  # Añadir encabezado para identificar cada sección
+        html_content += df_html
     else:
         html_content += f"<p>No data available for {source}</p>"
-    html_content += "</div></div>"
-
-html_content += """
-</div>
-</body>
-</html>
-"""
+html_content += "</body></html>"
 
 # Verificar el contenido del HTML antes de guardarlo
 print("HTML Content Preview:")
