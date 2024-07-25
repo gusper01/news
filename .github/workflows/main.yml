@@ -2,8 +2,9 @@ name: Fetch and Publish News
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # Se ejecuta diariamente a las 6 AM UTC
-  #   - cron: '0 0 * * *'  # Ejecutar una vez al día a medianoche
+ #   - cron: '0 6 * * *'  # Se ejecuta diariamente a las 6 AM UTC
+    - cron: '0 0 * * *'  # Ejecutar una vez al día a medianoche
+  workflow_dispatch:
   push:
     branches:
       - main
