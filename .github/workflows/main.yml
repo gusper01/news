@@ -1,16 +1,17 @@
 name: Fetch and Publish News
 
 on:
-  schedule:
- #   - cron: '0 6 * * *'  # Se ejecuta diariamente a las 6 AM UTC
-    - cron: '0 0 * * *'  # Ejecutar una vez al día a medianoche
-  workflow_dispatch:
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
+  schedule:
+ #   - cron: '0 6 * * *'  # Se ejecuta diariamente a las 6 AM UTC
+    - cron: '0 0 * * *'  # Ejecutar una vez al día a medianoche
+  workflow_dispatch:
+  
 permissions:
   contents: write
   id-token: write  # Agregar esto si ves errores relacionados con id-token
