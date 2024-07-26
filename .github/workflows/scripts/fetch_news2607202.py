@@ -1,30 +1,57 @@
 import feedparser
 import pandas as pd
+import requests
+import xml.etree.ElementTree as ET
 from datetime import datetime
 
 # Función para obtener noticias del feed RSS
-def get_news_from_rss(url, limit=10):
+def get_news_from_rss(url):
     print(f"Fetching news from: {url}")
     try:
-        feed = feedparser.parse(url)
-        if feed.entries:
+        # Configurar headers para la solicitud
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'application/xml'
+        }
+
+        # Realizar la solicitud GET al feed RSS
+        response = requests.get(url, headers=headers)
+
+        # Verificar el estado de la respuesta HTTP
+        if response.status_code == 200:
+            # Parsear el contenido XML del feed RSS
+            root = ET.fromstring(response.content)
             news_list = []
-            for entry in feed.entries[:limit]:
+
+            # Iterar sobre cada item (noticia) en el feed RSS
+            for item in root.findall('.//item'):
                 news = {}
-                news['Title'] = entry.title if 'title' in entry else 'N/A'
-                news['Link'] = entry.link if 'link' in entry else 'No link available'
-                news['Published Date'] = entry.published if 'published' in entry else 'N/A'
-                news['Summary'] = entry.summary if 'summary' in entry else 'N/A'
-                
+                news['Title'] = item.find('title').text if item.find('title') is not None else 'N/A'
+                news['Link'] = item.find('link').text if item.find('link') is not None else 'N/A'
+                news['Published Date'] = item.find('pubDate').text if item.find('pubDate') is not None else 'N/A'
+                news['Summary'] = item.find('description').text if item.find('description') is not None else 'N/A'
+
+                # Limpiar el texto del resumen
+                news['Summary'] = news['Summary'].replace('\n', ' ').replace('  ', ' ')
+
+                # Formatear la fecha publicada si está disponible
+                if news['Published Date'] != 'N/A':
+                    news['Published Date'] = ' '.join(news['Published Date'].split()[:4])
+
                 # Convertir el título en un enlace si el enlace está disponible
-                if news['Link'] != 'No link available':
+                if news['Link'] != 'N/A':
                     news['Title'] = f'<a href="{news["Link"]}" target="_blank">{news["Title"]}</a>'
-                
+
+                # Agregar la noticia a la lista
                 news_list.append(news)
+
+            # Crear un DataFrame de Pandas con los datos de las noticias
             df = pd.DataFrame(news_list)
             return df
+
         else:
-            print(f"No entries found in the feed: {url}")
+            print(f"Failed to fetch RSS feed, status code: {response.status_code}")
+
     except Exception as e:
         print(f"Failed to fetch RSS feed: {e}")
 
@@ -34,17 +61,13 @@ def get_news_from_rss(url, limit=10):
 rss_feeds = [
     ('https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best', 'Reuters - Business Finance'),
     ('https://www.reutersagency.com/feed/?best-topics=tech&post_type=best', 'Reuters - Tech'),
-    ('https://www.census.gov/economic-indicators/indicator.xml', 'Census - Economic Indicators'),
-    ('https://www.sec.gov/news/pressreleases.rss', 'SEC - Press Releases'),
-    ('https://www.cbsnews.com/latest/rss/moneywatch', 'CBS News - MoneyWatch'),
-    ('https://www.wired.com/feed/tag/ai/latest/rss', 'Wired - AI'),
     # Añade más feeds RSS aquí si es necesario
 ]
 
 # Obtener noticias de todos los feeds RSS
 all_news = []
 for url, source_name in rss_feeds:
-    news_df = get_news_from_rss(url, limit=10)
+    news_df = get_news_from_rss(url)
     if news_df is not None:
         all_news.append((news_df, source_name))
         print(f"\nDataFrame for {source_name}:")
@@ -103,5 +126,3 @@ print(html_content[:2000])  # Imprime los primeros 2000 caracteres del HTML
 # Guardar la página HTML
 with open('docs/index.html', 'w', encoding='utf-8') as f:
     f.write(html_content)
-
-print("HTML file has been generated successfully.")

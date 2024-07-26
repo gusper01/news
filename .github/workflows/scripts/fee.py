@@ -1,12 +1,16 @@
 import feedparser
 import pandas as pd
 from datetime import datetime
+import requests
 
 # Función para obtener noticias del feed RSS
 def get_news_from_rss(url, limit=10):
     print(f"Fetching news from: {url}")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
     try:
-        feed = feedparser.parse(url)
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        feed = feedparser.parse(response.content)
         if feed.entries:
             news_list = []
             for entry in feed.entries[:limit]:
