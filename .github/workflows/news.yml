@@ -30,7 +30,10 @@ jobs:
 
     - name: Fetch news and generate HTML
       run: python .github/workflows/scripts/fetch_news.py
-
+      
+    - name: List contents of ./docs
+      run: ls -la ./docs  
+      
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
