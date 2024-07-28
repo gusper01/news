@@ -29,8 +29,8 @@ jobs:
       run: pip install -r requirements.txt
 
     - name: Fetch news and generate HTML
-      run: python .github/workflows/scripts/fetch_news.py
-      
+      #run: python .github/workflows/scripts/fetch_news.py
+      run: python .github/workflows/scripts/fee6.py
     - name: List contents of ./docs
       run: ls -la ./docs  
       
