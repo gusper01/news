@@ -2,7 +2,17 @@ import feedparser
 import pandas as pd
 from datetime import datetime
 import requests
+from dateutil import parser
 
+def format_date(date_str):
+    try:
+        # Intentar parsear la fecha usando dateutil.parser
+        parsed_date = parser.parse(date_str)
+        # Formatear la fecha al formato deseado
+        return parsed_date.strftime('%a, %d %b %Y')
+    except (ValueError, TypeError):
+        # En caso de error, devolver la fecha original o un mensaje de error
+        return date_str
 # Función para obtener noticias del feed RSS
 def get_news_from_rss(url, limit=10):
     print(f"Fetching news from: {url}")
@@ -17,7 +27,19 @@ def get_news_from_rss(url, limit=10):
                 news = {}
                 news['Title'] = entry.title if 'title' in entry else 'N/A'
                 news['Link'] = entry.link if 'link' in entry else 'No link available'
-                news['Published Date'] = entry.published if 'published' in entry else 'N/A'
+                #news['Published Date'] = entry.published if 'published' in entry else 'N/A'
+                # Manejar diferentes posibles campos de fecha de publicación
+                if 'published' in entry:
+                    news['Published Date'] = format_date(entry.published)
+                elif 'cb_publicationdate' in entry:
+                    news['Published Date'] = format_date(entry.cb_publicationdate)
+                elif 'updated' in entry:
+                    news['Published Date'] = format_date(entry.updated)
+                elif 'pubDate' in entry:
+                    news['Published Date'] = format_date(entry.pubDate)    
+                else:
+                    news['Published Date'] = 'N/A'
+                
                 news['Summary'] = entry.summary if 'summary' in entry else 'N/A'
                 # Limpiar el texto del resumen
                 news['Summary'] = news['Summary'].replace('\n', ' ').replace('  ', ' ')
@@ -43,14 +65,18 @@ def get_news_from_rss(url, limit=10):
 rss_feeds = [
     ('https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best', 'Reuters - Business Finance', '💼'),
     ('https://www.reutersagency.com/feed/?best-topics=tech&post_type=best', 'Reuters - Tech', '💻'),
-    ('https://www.census.gov/economic-indicators/indicator.xml', 'Census - Economic Indicators', '📊'),
+    ('https://www.census.gov/economic-indicators/indicator.xml', 'US Census Bureau - Economic Indicators', '📊'),
     ('https://www.sec.gov/news/pressreleases.rss', 'SEC - Press Releases', '📜'),
+    ('https://www.bis.org/doclist/reshub_papers.rss', 'BIS - Central Bank Research Hub', '🏛️'),
+    ('https://money.com/money/feed/', 'Money - Financial News', '💰'),
     ('https://www.cbsnews.com/latest/rss/moneywatch', 'CBS News - MoneyWatch', '💰'),
     ('https://www.wired.com/feed/tag/ai/latest/rss', 'Wired - AI', '🤖'),
+    ('https://finance.yahoo.com/news/rssindex', 'Yahoo - Finance', '💹'),
     ('https://feeds.bloomberg.com/politics/news.rss', 'Bloomberg - Politics', '🏛️'),
     ('https://feeds.bloomberg.com/technology/news.rss', 'Bloomberg - Technology', '🔧'),
     ('https://feeds.bloomberg.com/bview/news.rss', 'Bloomberg - Business View', '📈'),
     ('https://feeds.bloomberg.com/markets/news.rss', 'Bloomberg - Markets', '📉'),
+    ('https://fortune.com/feed/fortune-feeds/?id=3230629', 'Fortune - Feeds', '💰')
 ]
 
 # Obtener noticias de todos los feeds RSS
@@ -79,14 +105,16 @@ html_content = f"""
     <style>
         body {{
             background-color: #1e1e1e;
-            color: #00ff00;
+            color: white;
             font-family: monospace;
         }}
         a {{
-            color: #00ff00;
+          /*  color: #00ff00; */
+          color: yellow;
         }}
         .card-header {{
-            background-color: #00ff00;
+           /* background-color: #00ff00; */
+            background-color: white; 
             color: #000000;
         }}
         .table-responsive {{
@@ -96,7 +124,8 @@ html_content = f"""
             background-color: #2b2b2b;
         }}
         h1, h2, h3 {{
-            color: #00ff00;
+          /*  color: #00ff00; */
+          color: white;
         }}
         ul {{
             list-style-type: none;
