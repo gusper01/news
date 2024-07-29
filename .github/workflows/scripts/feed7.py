@@ -1,34 +1,27 @@
 import feedparser
 import pandas as pd
 from datetime import datetime
-import requests
 from dateutil import parser
 
 def format_date(date_str):
     try:
-        # Intentar parsear la fecha usando dateutil.parser
         parsed_date = parser.parse(date_str)
-        # Formatear la fecha al formato deseado
         return parsed_date.strftime('%a, %d %b %Y')
     except (ValueError, TypeError):
-        # En caso de error, devolver la fecha original o un mensaje de error
         return date_str
+
 # Función para obtener noticias del feed RSS
 def get_news_from_rss(url, limit=10):
     print(f"Fetching news from: {url}")
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        feed = feedparser.parse(response.content)
+        feed = feedparser.parse(url)
         if feed.entries:
             news_list = []
             for entry in feed.entries[:limit]:
                 news = {}
                 news['Title'] = entry.title if 'title' in entry else 'N/A'
                 news['Link'] = entry.link if 'link' in entry else 'No link available'
-                #news['Published Date'] = entry.published if 'published' in entry else 'N/A'
-                # Manejar diferentes posibles campos de fecha de publicación
+
                 if 'published' in entry:
                     news['Published Date'] = format_date(entry.published)
                 elif 'cb_publicationdate' in entry:
@@ -39,15 +32,12 @@ def get_news_from_rss(url, limit=10):
                     news['Published Date'] = format_date(entry.pubDate)    
                 else:
                     news['Published Date'] = 'N/A'
-                
+
                 news['Summary'] = entry.summary if 'summary' in entry else 'N/A'
-                # Limpiar el texto del resumen
                 news['Summary'] = news['Summary'].replace('\n', ' ').replace('  ', ' ')
 
-                # Formatear la fecha publicada si está disponible
                 if news['Published Date'] != 'N/A':
                     news['Published Date'] = ' '.join(news['Published Date'].split()[:4])
-                # Convertir el título en un enlace si el enlace está disponible
                 if news['Link'] != 'No link available':
                     news['Title'] = f'<a href="{news["Link"]}" target="_blank">{news["Title"]}</a>'
                 
@@ -77,7 +67,7 @@ rss_feeds = [
     ('https://feeds.bloomberg.com/bview/news.rss', 'Bloomberg - Business View', '📈'),
     ('https://feeds.bloomberg.com/markets/news.rss', 'Bloomberg - Markets', '📉'),
     ('https://fortune.com/feed/fortune-feeds/?id=3230629', 'Fortune - Feeds', '💰'),
-     ('https://www.imf.org/en/News/RSS?Language=ENG', 'IMF - International Monetary Found', '🏛️')
+    ('https://www.imf.org/en/News/RSS?Language=ENG', 'IMF - International Monetary Fund', '🏛️')
 ]
 
 # Obtener noticias de todos los feeds RSS
@@ -110,11 +100,9 @@ html_content = f"""
             font-family: monospace;
         }}
         a {{
-          /*  color: #00ff00; */
           color: yellow;
         }}
         .card-header {{
-           /* background-color: #00ff00; */
             background-color: white; 
             color: #000000;
         }}
@@ -125,13 +113,12 @@ html_content = f"""
             background-color: #2b2b2b;
         }}
         h1, h2, h3 {{
-          /*  color: #00ff00; */
           color: white;
         }}
         ul {{
             list-style-type: none;
             padding: 0;
-            font-size: 1.5em;  /* Tamaño de fuente más grande */
+            font-size: 1.5em;
         }}
         ul li {{
             margin-bottom: 10px;
@@ -146,7 +133,7 @@ html_content = f"""
             padding: 5px;
         }}
         .icon {{
-            font-size: 1.5em;  /* Tamaño del icono más grande */
+            font-size: 1.5em;
         }}
     </style>
 </head>
