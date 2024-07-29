@@ -30,7 +30,7 @@ jobs:
 
     - name: Fetch news and generate HTML
       #run: python .github/workflows/scripts/fetch_news.py
-      run: python .github/workflows/scripts/fee6.py
+      run: python .github/workflows/scripts/feed7.py
     - name: List contents of ./docs
       run: ls -la ./docs  
       
